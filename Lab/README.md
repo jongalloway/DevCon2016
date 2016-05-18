@@ -88,7 +88,7 @@ In this task, you'll create an empty ASP.NET Core 1.0 project and configure it t
 
 1. Open **Visual Studio Community 2015** and select **File | New Project...** to start a new solution.
 
-1. In the **New Project** dialog box, select **ASP.NET Web Application** under the **Visual C# | Web** tab, and make sure **.NET Framework 4.6** is selected. Name the project _MyWebApp_, choose a **Location** and click **OK**.
+1. In the **New Project** dialog box, select **ASP.NET Core Web Application** under the **Visual C# | Web** tab, and make sure **.NET Framework 4.6** is selected. Name the project _MyWebApp_, choose a **Location** and click **OK**.
 
 	![New ASP.NET Web Application project](Images/creating-new-aspnet-web-application-project.png?raw=true "New ASP.NET Web Application project")
 
@@ -100,7 +100,7 @@ In this task, you'll create an empty ASP.NET Core 1.0 project and configure it t
 
 	_Creating a new project with the ASP.NET Core Empty template_
 
-1. Add the **Microsoft.AspNet.StaticFiles** package as a dependency to **project.json**.
+1. Add the **Microsoft.AspNetCore.StaticFiles** package as a dependency to **project.json**.
 
 	````JSON
 	"dependencies": {
@@ -198,7 +198,7 @@ In this task, you'll configure the project to use ASP.NET MVC and configure a sa
 
 1. Open **Visual Studio Community 2015** and the **MyWebApp.sln** solution located in the **Source/Ex1/End** folder. Alternatively, you can continue with the solution that you obtained in the previous exercise.
 
-1. Open the **project.json** file and add **Microsoft.AspNet.Mvc** to the **dependencies** section.
+1. Open the **project.json** file and add **Microsoft.AspNetCore.Mvc** to the **dependencies** section.
 
 	````JSON
   "dependencies": {
@@ -663,29 +663,29 @@ In this task, you'll learn how the ASP.NET Core project templates use ASP.NET Id
 
 1. Open **Visual Studio Community 2015** and select **File | New | Project...** to create a new solution.
 
-1. In the **New Project** dialog box, select **ASP.NET Web Application** under the **Visual C# | Web** tab, and make sure **.NET Framework 4.6** is selected. Name the project _MyWebApp_, choose a **Location** and click **OK**.
+1. In the **New Project** dialog box, select **ASP.NET Core Web Application** under the **Visual C# | Web** tab, and make sure **.NET Framework 4.6** is selected. Choose a name for the project (e.g. _MyIdentityWebApp_), choose a **Location** and click **OK**.
 
 	![New ASP.NET Web Application project](Images/creating-new-aspnet-web-application-project.png?raw=true "New ASP.NET Web Application project")
 
 	_Creating a new ASP.NET Web Application project_
 
-1. In the **New ASP.NET Project** dialog box, select the **Web Application** template under **ASP.NET 5 Templates**. Also, make sure that the **Authentication** option is set to **Individual User Accounts**. Click **OK** to continue.
+1. In the **New ASP.NET Project** dialog box, select the **Web Application** template. Also, make sure that the **Authentication** option is set to **Individual User Accounts**. Click **OK** to continue.
 
 	![Creating a new project with the Web Application template](Images/creating-a-new-aspnet-project.png?raw=true "Creating a new project with the Web Application template")
 
 	_Creating a new project with the Web Application template_
 
-1. Once the project is created, open the _project.json_ file and locate the _Microsoft.AspNet.Identity.EntityFramework_ package. This package has the **Entity Framework** implementation of **ASP.NET Identity** which will persist the ASP.NET Identity data and schema to SQL Server.
+1. Once the project is created, open the _project.json_ file and locate the _Microsoft.AspNetCore.Identity.EntityFramework_ package. This package has the **Entity Framework** implementation of **ASP.NET Identity** which will persist the ASP.NET Identity data and schema to SQL Server.
 
-	![The Microsoft.AspNet.Identity.EntityFramework package](Images/the-identity-package.png?raw=true "The Microsoft.AspNet.Identity.EntityFramework package")
+	![The Microsoft.AspNetCore.Identity.EntityFramework package](Images/the-identity-package.png?raw=true "The Microsoft.AspNetCore.Identity.EntityFramework package")
 
-	_The Microsoft.AspNet.Identity.EntityFramework package_
+	_The Microsoft.AspNetCore.Identity.EntityFramework package_
 
-1. Expand the References node in Solution Explorer and then expand the _Microsoft.AspNet.Identity.EntityFramework_ package inside _DNX 4.5.1_. Note that it depends on _Microsoft.AspNet.Identity_ which is the primary reference assembly for the ASP.NET Identity system. This assembly contains the core set of interfaces for ASP.NET Identity.
+1. Expand the References node in Solution Explorer and then expand the _Microsoft.AspNetCore.Identity.EntityFramework_ package inside _DNX 4.5.1_. Note that it depends on _Microsoft.AspNetCore.Identity_ which is the primary reference assembly for the ASP.NET Identity system. This assembly contains the core set of interfaces for ASP.NET Identity.
 
-	![The Microsoft.AspNet.Identity.EntityFramework dependencies](Images/the-identity-package-dependencies.png?raw=true "The Microsoft.AspNet.Identity.EntityFramework package dependencies")
+	![The Microsoft.AspNetCore.Identity.EntityFramework dependencies](Images/the-identity-package-dependencies.png?raw=true "The Microsoft.AspNeCoret.Identity.EntityFramework package dependencies")
 
-	_The Microsoft.AspNet.Identity.EntityFramework package dependencies_
+	_The Microsoft.AspNetCore.Identity.EntityFramework package dependencies_
 
 1. Open the _Startup.cs_ file and locate the **ConfigureServices** method. In this method, the Identity services are configured by the following code.
 
@@ -721,9 +721,10 @@ In this task, you'll learn how the ASP.NET Core project templates use ASP.NET Id
     [HttpPost]
     [AllowAnonymous]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Register(RegisterViewModel model)
+    public async Task<IActionResult> Register(RegisterViewModel model, string returnUrl = null)
     {
-        if (ModelState.IsValid)
+        ViewData["ReturnUrl"] = returnUrl;
+		if (ModelState.IsValid)
         {
             var user = new ApplicationUser { UserName = model.Email, Email = model.Email };
             var result = await _userManager.CreateAsync(user, model.Password);
@@ -820,12 +821,12 @@ In this task, you'll create a Facebook app and configure your Web Application pr
 	}
 	````
 
-1. Open the _project.json_ file and add the **Microsoft.AspNet.Authentication.Facebook** package as dependency
+1. Open the _project.json_ file and add the **Microsoft.AspNetCore.Authentication.Facebook** package as dependency
 
 	````JSON
   "dependencies": {
 		...
-		"Microsoft.AspNet.Authentication.Facebook":  "1.0.0-rc1-final"
+		"Microsoft.AspNetCore.Authentication.Facebook": "1.0.0-rc2-final",
   },
 	````
 
@@ -840,10 +841,10 @@ In this task, you'll create a Facebook app and configure your Web Application pr
 
         app.UseIdentity();
 
-        app.UseFacebookAuthentication(options =>
+        app.UseFacebookAuthentication(new FacebookOptions
         {
-            options.AppId = Configuration["Authentication:Facebook:AppId"];
-            options.AppSecret = Configuration["Authentication:Facebook:AppSecret"];
+            AppId = Configuration["Authentication:Facebook:AppId"],
+            AppSecret = Configuration["Authentication:Facebook:AppSecret"]
         });
 
         // ...

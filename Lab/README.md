@@ -24,11 +24,19 @@ In this module, you'll see how to:
 
 The following is required to complete this module:
 
-- [Visual Studio Community 2015][1] or greater
-- [ASP.NET Core 1.0][2]
-
-[1]: https://www.visualstudio.com/products/visual-studio-community-vs
-[2]: https://get.asp.net
+- [Visual Studio Community 2015 (free)][1] or greater
+- [Visual Studio 2015 Update 2][2]
+- [.NET Core SDK][3] including
+  - [Visual Studio tools for .NET Core - Preview 1][4] (for Visual Studio support)
+  - [NuGet Manager extension][5] version 3.5 or later
+  - [.NET Core SDK for Windows][6] (for command-line support)
+  
+[1]: https://www.visualstudio.com/en-us/downloads/download-visual-studio-vs.aspx
+[2]: http://go.microsoft.com/fwlink/?LinkId=691129
+[3]: https://dot.net
+[4]: https://go.microsoft.com/fwlink/?LinkId=798481
+[5]: https://dist.nuget.org/visualstudio-2015-vsix/v3.5.0-beta/NuGet.Tools.vsix
+[6]: https://go.microsoft.com/fwlink/?LinkID=798398
 
 > **Note:** You can take advantage of the [Visual Studio Dev Essentials]( https://www.visualstudio.com/en-us/products/visual-studio-dev-essentials-vs.aspx) subscription in order to get everything you need to build and deploy your app on any platform.
 
@@ -86,7 +94,7 @@ In this task, you'll create an empty ASP.NET Core 1.0 project and configure it t
 
 	_Creating a new ASP.NET Web Application project_
 
-1. In the **New ASP.NET Project** dialog box, select the **Empty** template under **ASP.NET 5 Templates**. Click **OK**.
+1. In the **New ASP.NET Project** dialog box, select the **Empty** template. Click **OK**.
 
 	![Creating a new project with the ASP.NET Core Empty template](Images/creating-a-new-empty-project.png?raw=true "Creating a new project with the ASP.NET Core Empty template")
 
@@ -96,9 +104,9 @@ In this task, you'll create an empty ASP.NET Core 1.0 project and configure it t
 
 	````JSON
 	"dependencies": {
-	  "Microsoft.AspNet.IISPlatformHandler": "1.0.0-rc1-final",
-	  "Microsoft.AspNet.Server.Kestrel": "1.0.0-rc1-final",
-	  "Microsoft.AspNet.StaticFiles": "1.0.0-rc1-final"
+      "Microsoft.AspNetCore.Server.IISIntegration": "1.0.0-rc2-final",
+      "Microsoft.AspNetCore.Server.Kestrel": "1.0.0-rc2-final",
+      "Microsoft.AspNetCore.StaticFiles": "1.0.0-rc2-final"
 	},
 	````
 
@@ -108,8 +116,6 @@ In this task, you'll create an empty ASP.NET Core 1.0 project and configure it t
 	````C#
     public void Configure(IApplicationBuilder app)
     {
-        app.UseIISPlatformHandler();
-
         app.UseStaticFiles();
 
         app.Run(async (context) =>
@@ -163,8 +169,6 @@ In this task, you'll use the **UseFileServer** to enable serving both, static an
 	````C#
     public void Configure(IApplicationBuilder app)
     {
-        app.UseIISPlatformHandler();
-
         app.UseFileServer();
 
         app.Run(async (context) =>
@@ -197,33 +201,37 @@ In this task, you'll configure the project to use ASP.NET MVC and configure a sa
 1. Open the **project.json** file and add **Microsoft.AspNet.Mvc** to the **dependencies** section.
 
 	````JSON
-	"dependencies": {
-		"Microsoft.AspNet.IISPlatformHandler": "1.0.0-rc1-final",
-		"Microsoft.AspNet.Server.Kestrel": "1.0.0-rc1-final",
-		"Microsoft.AspNet.StaticFiles": "1.0.0-rc1-final",
-		"Microsoft.AspNet.Mvc": "6.0.0-rc1-final"
-	},
-	````
+  "dependencies": {
+    "Microsoft.NETCore.App": {
+      "version": "1.0.0-rc2-3002702",
+      "type": "platform"
+    },
+    "Microsoft.AspNetCore.Server.IISIntegration": "1.0.0-rc2-final",
+    "Microsoft.AspNetCore.Server.Kestrel": "1.0.0-rc2-final",
+    "Microsoft.AspNetCore.StaticFiles": "1.0.0-rc2-final",
+    "Microsoft.AspNetCore.Mvc": "1.0.0-rc2-final"
+  },
+  	````
 
 1. In **Solution Explorer**, right-click the **MyWebApp** project and select **Add | New Folder** and name the folder _Controllers_.
 
-1. Right-click the new folder and select **Add | New Item...**, select **MVC Controller Class**, name the file _HomeController.cs_ and click **Add**.
+1. Right-click the new folder and select **Add | New Item...**, ensure the **.NET Core** node is selected on the left, select **MVC Controller Class**, name the file _HomeController.cs_ and click **Add**.
 
 1. Replace the content of the file with the following code snippet.
 
 	(Code Snippet - _ASPNETCore - Ex2 - HomeController_)
 	<!-- mark:1-10 -->
 	````C#
-	namespace MyWebApp.Controllers
-	{
-		 using Microsoft.AspNet.Mvc;
+    using Microsoft.AspNetCore.Mvc;
 
-		 public class HomeController : Controller
-		 {
-			  [HttpGet()]
-			  public string Index() => "Hello from MVC!";
-		 }
-	}
+    namespace MyWebApp.Controllers
+    {
+        public class HomeController : Controller
+        {
+            // GET: /<controller>/
+            public string Index() => "Hello from MVC!";
+        }
+    }
 	````
 
 1. Now, open the **Startup.cs** file and add the MVC services and middleware to the configuration, adding `services.AddMvc()` and replacing the `app.Run` method call in the **Configure** method with the `UseMvc` method as shown in the following code snippet.
@@ -238,8 +246,6 @@ In this task, you'll configure the project to use ASP.NET MVC and configure a sa
     // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
     public void Configure(IApplicationBuilder app)
     {
-        app.UseIISPlatformHandler();
-
         app.UseFileServer();
 
         app.UseMvc(routes =>
@@ -253,7 +259,7 @@ In this task, you'll configure the project to use ASP.NET MVC and configure a sa
 
 1. Run the site and verify the message is returned from your MVC controller by navigating to the **/home** endpoint.
 
-	> **Note:** ASP.NET Core MVC also includes a handy new utility method, `app.UseMvcWithDefaultRoute` so you don't have to remember that template string.
+	> **Note:** ASP.NET Core MVC also includes a handy new utility method, `app.UseMvcWithDefaultRoute()` so you don't have to remember that template string.
 
 <a name="Exercise3" ></a>
 ### Exercise 3: Writing custom middleware ###

@@ -1,10 +1,10 @@
-﻿namespace MyWebApp.Controllers
-{
-    using Microsoft.AspNet.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 
+namespace MyWebApp.Controllers
+{
     public class HomeController : Controller
     {
-        [HttpGet()]
+        // GET: /<controller>/
         public string Index() => "Hello from MVC!";
     }
 }

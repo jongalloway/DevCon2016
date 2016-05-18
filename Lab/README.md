@@ -288,21 +288,14 @@ In this task, you'll create inline middleware.
 	````C#
     public void Configure(IApplicationBuilder app)
     {
-        app.UseIISPlatformHandler();
-
         app.Use((context, next) =>
         {
             var cultureQuery = context.Request.Query["culture"];
             if (!string.IsNullOrWhiteSpace(cultureQuery))
             {
                 var culture = new CultureInfo(cultureQuery);
-#if !DNXCORE50
-                Thread.CurrentThread.CurrentCulture = culture;
-                Thread.CurrentThread.CurrentUICulture = culture;
-#else
                 CultureInfo.CurrentCulture = culture;
                 CultureInfo.CurrentUICulture = culture;
-#endif
             }
 
             // Call the next delegate/middleware in the pipeline
@@ -354,13 +347,8 @@ In this task you'll move the middleware to a separated file.
         if (!string.IsNullOrWhiteSpace(cultureQuery))
         {
             var culture = new CultureInfo(cultureQuery);
-#if !DNXCORE50
-            Thread.CurrentThread.CurrentCulture = culture;
-            Thread.CurrentThread.CurrentUICulture = culture;
-#else
             CultureInfo.CurrentCulture = culture;
             CultureInfo.CurrentUICulture = culture;
-#endif
         }
 
         // Call the next delegate/middleware in the pipeline
@@ -388,8 +376,6 @@ In this task you'll move the middleware to a separated file.
 	``` C#
     public void Configure(IApplicationBuilder app)
     {
-        app.UseIISPlatformHandler();
-
         app.UseRequestCulture();
 
         app.Run(async (context) =>
@@ -459,13 +445,8 @@ In this task, you'll update the **RequestCultureMiddleware** implementation to s
 
         if (requestCulture != null)
         {
-#if !DNXCORE50
-            Thread.CurrentThread.CurrentCulture = requestCulture;
-            Thread.CurrentThread.CurrentUICulture = requestCulture;
-#else
             CultureInfo.CurrentCulture = requestCulture;
             CultureInfo.CurrentUICulture = requestCulture;
-#endif
         }
 
         return this.next(context);
@@ -525,7 +506,7 @@ In this task, you'll use the new **Configuration** system loading the default cu
 	(Code Snippet - _ASPNETCore - Ex3 - StartupConstructor_)
 	<!-- mark:1-7 -->
 	````C#
-    public Startup()
+    public Startup(IHostingEnvironment env)
     {
         var configuration = new ConfigurationBuilder()
             .Build();
@@ -538,11 +519,15 @@ In this task, you'll use the new **Configuration** system loading the default cu
 
 	<!-- mark:4 -->
 	````JSON
-	"dependencies": {
-	  "Microsoft.AspNet.IISPlatformHandler": "1.0.0-rc1-final",
-	  "Microsoft.AspNet.Server.Kestrel": "1.0.0-rc1-final",
-	  "Microsoft.Extensions.Configuration.Json": "1.0.0-rc1-final"
-	},
+  "dependencies": {
+    "Microsoft.NETCore.App": {
+      "version": "1.0.0-rc2-3002702",
+      "type": "platform"
+    },
+    "Microsoft.AspNetCore.Server.IISIntegration": "1.0.0-rc2-final",
+    "Microsoft.AspNetCore.Server.Kestrel": "1.0.0-rc2-final",
+    "Microsoft.Extensions.Configuration.Json": "1.0.0-rc2-final"
+  },
 	````
 
 1. Back in the _Startup.cs_ file, add a call to `.AddJsonFile("config.json")` immediately after the creation of the **ConfigurationBuilder** object as a chained method.
@@ -553,9 +538,10 @@ In this task, you'll use the new **Configuration** system loading the default cu
     {
         private readonly IConfiguration configuration;
 
-        public Startup()
+        public Startup(IHostingEnvironment env)
         {
             var configuration = new ConfigurationBuilder()
+				.SetBasePath(env.ContentRootPath)
                 .AddJsonFile("config.json")
                 .Build();
 
@@ -603,12 +589,17 @@ In this task you'll use the dependency injection system to configure the **Reque
 1. Open the _project.json_ file and add a reference to the **Microsoft.Extensions.OptionsModel** package in the **dependencies** node.
 
 	````JSON
-	"dependencies": {
-	  "Microsoft.AspNet.IISPlatformHandler": "1.0.0-rc1-final",
-	  "Microsoft.AspNet.Server.Kestrel": "1.0.0-rc1-final",
-	  "Microsoft.Extensions.Configuration.Json": "1.0.0-rc1-final",
-	  "Microsoft.Extensions.OptionsModel": "1.0.0-rc1-final"
-	},
+  "dependencies": {
+    "Microsoft.NETCore.App": {
+      "version": "1.0.0-rc2-3002702",
+      "type": "platform"
+    },
+    "Microsoft.AspNetCore.Server.IISIntegration": "1.0.0-rc2-final",
+    "Microsoft.AspNetCore.Server.Kestrel": "1.0.0-rc2-final",
+    "Microsoft.Extensions.Configuration.Json": "1.0.0-rc2-final",
+    "Microsoft.Extensions.Options": "1.0.0-rc2-final"
+  },
+
 	````
 
 1. Change the **RequestCultureMiddleware** constructor to take `IOptions<RequestCultureOptions>` instead of `RequestCultureOptions` and obtain the value of the options parameter. Resolve the missing dependencies.
